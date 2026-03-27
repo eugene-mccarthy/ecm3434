@@ -9,9 +9,9 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-dark navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="{{ url_for('listings.index') }}">&#127968; Community Tourist</a>
+        <a class="navbar-brand" href="{{ url_for('listings.index') }}">Community Tourist</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                 aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -23,7 +23,7 @@
                 </li>
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('listings.add') }}">+ Add Listing</a>
+                    <a class="nav-link" href="{{ url_for('listings.add') }}">Add Listing</a>
                 </li>
                 {% if current_user.is_admin %}
                 <li class="nav-item">
@@ -37,7 +37,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.profile') }}">
                         {{ current_user.username }}
-                        <span class="badge bg-warning text-dark ms-1">{{ current_user.points }} pts</span>
+                        <span class="badge ms-1">{{ current_user.points }} pts</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -71,8 +71,8 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="py-3 bg-light border-top mt-auto">
-    <div class="container text-center text-muted small">
+<footer class="mt-auto py-3">
+    <div class="container text-center">
         &copy; 2026 Community Tourist Assistant &mdash; Powered by the community, for the community.
     </div>
 </footer>
