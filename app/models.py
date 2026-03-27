@@ -43,6 +43,7 @@ class Listing(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     status = db.Column(db.String(20), default="pending")  # pending | approved | rejected
     avg_rating = db.Column(db.Float, default=0.0)
+    photo_filename = db.Column(db.String(256), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     ratings = db.relationship("Rating", backref="listing", lazy=True)

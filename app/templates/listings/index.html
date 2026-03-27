@@ -30,7 +30,13 @@
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for listing in listings %}
     <div class="col">
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100">
+            {% if listing.photo_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + listing.photo_filename) }}"
+                 alt="{{ listing.title }}" class="listing-card-img">
+            {% else %}
+            <div class="listing-card-placeholder"></div>
+            {% endif %}
             <div class="card-body">
                 <span class="badge bg-secondary mb-2">{{ listing.category.name }}</span>
                 <h5 class="card-title">{{ listing.title }}</h5>

@@ -11,7 +11,17 @@
             </ol>
         </nav>
 
-        <div class="card shadow-sm mb-4">
+        <div class="card mb-4">
+            {% if listing.photo_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + listing.photo_filename) }}"
+                 alt="{{ listing.title }}"
+                 class="listing-photo">
+            {% else %}
+            <div class="listing-photo-placeholder">
+                <span>No photograph available</span>
+            </div>
+            {% endif %}
+
             <div class="card-body">
                 <span class="badge bg-secondary mb-2">{{ listing.category.name }}</span>
                 <h2 class="card-title h3">{{ listing.title }}</h2>
@@ -28,7 +38,7 @@
         </div>
 
         {% if current_user.is_authenticated %}
-        <div class="card shadow-sm mb-4">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Rate this place</h5>
                 <form method="POST" action="{{ url_for('listings.rate', listing_id=listing.id) }}"

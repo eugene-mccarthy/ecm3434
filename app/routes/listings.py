@@ -1,10 +1,44 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+import os
+import uuid
+
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from app import db
 from app.models import Listing, Category, Rating
 
 listings_bp = Blueprint("listings", __name__)
 
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
+MAX_UPLOAD_BYTES = 2 * 1024 * 1024  # 2 MB
+
+
+def _save_photo(file):
+    """
+    Validate and persist an uploaded photo.
+
+    Returns the saved filename (str) or None if no file was provided.
+    Raises ValueError with a user-friendly message on validation failure.
+    """
+    if not file or file.filename == "":
+        return None
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        raise ValueError("Only JPG and PNG images are accepted.")
+
+    # Measure size without loading the whole file into memory
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    if size > MAX_UPLOAD_BYTES:
+        raise ValueError("Photo must be 2 MB or smaller.")
+
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+    return filename
+
+
+# ---------------------------------------------------------------------------
 
 @listings_bp.route("/")
 def index():
@@ -47,23 +81,35 @@ def add():
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
         category_id = request.form.get("category_id", type=int)
+
         if not title or not description or not category_id:
-            flash("All fields are required.", "error")
+            flash("Title, category, and description are all required.", "error")
             return render_template(
                 "listings/add.html", title="Add Listing", categories=categories
             )
+
+        try:
+            photo_filename = _save_photo(request.files.get("photo"))
+        except ValueError as exc:
+            flash(str(exc), "error")
+            return render_template(
+                "listings/add.html", title="Add Listing", categories=categories
+            )
+
         listing = Listing(
             title=title,
             description=description,
             category_id=category_id,
             user_id=current_user.id,
             status="pending",
+            photo_filename=photo_filename,
         )
         db.session.add(listing)
         current_user.points += 5
         db.session.commit()
         flash("Listing submitted for review. You earned 5 points!", "success")
         return redirect(url_for("listings.index"))
+
     return render_template("listings/add.html", title="Add Listing", categories=categories)
 
 

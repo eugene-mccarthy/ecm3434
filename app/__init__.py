@@ -26,5 +26,32 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        _apply_migrations(db)
 
     return app
+
+
+def _apply_migrations(db):
+    """
+    Lightweight schema migrations for SQLite.
+    Adds any columns introduced after the initial db.create_all() so that
+    existing databases are updated automatically on the next app start.
+    """
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db.engine)
+
+    # Guard: listings table may not exist yet in a brand-new test DB
+    if "listings" not in inspector.get_table_names():
+        return
+
+    existing = {col["name"] for col in inspector.get_columns("listings")}
+
+    pending = {
+        "photo_filename": "ALTER TABLE listings ADD COLUMN photo_filename VARCHAR(256)",
+    }
+
+    for column, sql in pending.items():
+        if column not in existing:
+            db.session.execute(text(sql))
+    db.session.commit()
