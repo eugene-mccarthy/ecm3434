@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <h2 class="mb-4">My Profile</h2>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Username</dt>
+                    <dd class="col-sm-8">{{ current_user.username }}</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">{{ current_user.email }}</dd>
+
+                    <dt class="col-sm-4">Points</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-warning text-dark fs-6">{{ current_user.points }}</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Member since</dt>
+                    <dd class="col-sm-8 mb-0">{{ current_user.created_at.strftime('%d %b %Y') }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <h4 class="mb-3">My Listings</h4>
+        {% if current_user.listings %}
+        <ul class="list-group shadow-sm">
+            {% for listing in current_user.listings %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('listings.detail', listing_id=listing.id) }}"
+                   class="text-decoration-none">{{ listing.title }}</a>
+                <span class="badge
+                    {% if listing.status == 'approved' %}bg-success
+                    {% elif listing.status == 'pending' %}bg-warning text-dark
+                    {% else %}bg-danger{% endif %}">
+                    {{ listing.status }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">
+            You haven't added any listings yet.
+            <a href="{{ url_for('listings.add') }}">Add one now!</a>
+        </p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
