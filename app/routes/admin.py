@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from app import db
 from app.models import Listing
@@ -10,9 +10,10 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            flash("Admin access required.", "error")
-            return redirect(url_for("listings.index"))
+        # Unauthenticated users are handled by @login_required (302 → login).
+        # Authenticated non-admins get a hard 403.
+        if not current_user.is_admin:
+            abort(403)
         return f(*args, **kwargs)
     return decorated
 
